@@ -15,8 +15,12 @@ module SuperTues
       @@channels = {}
       @@games = {}
 
-      def game_id
+      def self.game_id
         env['game_id']
+      end
+
+      def self.game
+        env['game'] ||= @@games[game_id]
       end
 
       def on_open(env)
@@ -53,6 +57,7 @@ module SuperTues
       def response(env)
         if env['REQUEST_PATH'] =~ /games\/(\w+)$/i
           env['game_id'] = $1
+          env['game'] ||= Game.game
           super(env)
         else
           [404, {}, "Game not found"]
@@ -60,6 +65,13 @@ module SuperTues
       end
 
     private
+
+      def new_or_existing_game
+        env['game'] = @@games[game_id] || begin
+          env.logger.info "Creating new game."
+          SuperTues::Board::Game.new
+        end
+      end
 
       def subscribe_to_game_channel
         env['channel'] = channel = @@channels[game_id] || begin
