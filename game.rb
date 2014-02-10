@@ -2,6 +2,9 @@ require 'json'
 require 'goliath'
 require 'goliath/websocket'
 
+require 'dispatchio'
+require 'super_tues/board'
+
 module SuperTues
   module Server
 
@@ -15,11 +18,11 @@ module SuperTues
       @@channels = {}
       @@games = {}
 
-      def self.game_id
+      def game_id
         env['game_id']
       end
 
-      def self.game
+      def game
         env['game'] ||= @@games[game_id]
       end
 
@@ -32,7 +35,6 @@ module SuperTues
         env.logger.info "<<--: #{msg}"
         type, payload = parse_message(msg)
         resp = handle_message(env, type, payload)
-        # env['channels'][game_id] << resp
       end
 
       def on_close(env) 
@@ -57,7 +59,7 @@ module SuperTues
       def response(env)
         if env['REQUEST_PATH'] =~ /games\/(\w+)$/i
           env['game_id'] = $1
-          env['game'] ||= Game.game
+          new_or_existing_game
           super(env)
         else
           [404, {}, "Game not found"]
@@ -67,8 +69,10 @@ module SuperTues
     private
 
       def new_or_existing_game
-        env['game'] = @@games[game_id] || begin
-          env.logger.info "Creating new game."
+        env['game'] = if @@games[game_id]
+          @@games[game_id]
+        else
+          env.logger.info "Creating new game. (ID=#{game_id})"
           SuperTues::Board::Game.new
         end
       end
@@ -90,6 +94,7 @@ module SuperTues
       end
 
       def join_game(name)
+        game.add_players SuperTues::Board::Player.new(name: name)
         send_message 'joined', who: name
       end
 
