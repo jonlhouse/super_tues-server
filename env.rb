@@ -32,7 +32,10 @@ module SuperTues
         self.ws = current_ws
         # find the current player
         self.player, player_hash = players.find( -> { [nil,nil] }) { |name,info| info[:ws] == ws }
-        puts "Current player: #{player}, ws: #{ws}"
+      end
+
+      def inspect
+        %Q[Env: game: #{game}, channel: #{channel}, ws: #{ws}, players: #{players.keys.join(', ')}, player: #{player}]
       end
 
     end

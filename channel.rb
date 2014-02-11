@@ -23,6 +23,10 @@ module SuperTues
           EM.schedule { @subs[player.to_s].call message(type, payload) }
         end
       end 
+
+      def to_s
+        "Channel with subscribers: [#{@subs.keys.join(', ')}]>"
+      end
     private
       def message(type, payload)
         [type, payload].to_json
