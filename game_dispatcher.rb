@@ -18,7 +18,9 @@ module SuperTues
         add Listeners::GameJoiner.new('game.join', env: env)
         add Listeners::CandidateDealer.new('deal-candidates', env: env)
         add Listeners::CandidatePicked.new('candidate.picked', env: env)
-        add Listeners::StartGame.new('start-game', env: env)
+        add Listeners::InitGame.new('game.init', env: env)
+        add Listeners::PlayerReady.new('player.ready')
+        add Listeners::StartGame.new('game.start', env: env)
       end
 
     end
