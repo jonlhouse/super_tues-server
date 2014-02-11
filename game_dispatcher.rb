@@ -1,9 +1,10 @@
 require 'dispatchio'
 
 require_relative "./listeners/game_listener"
-[:game_joiner, :candidate_dealer, :candidate_picked, :start_game].each do |listener|
-  require_relative "./listeners/#{listener}"
-end
+[
+  :game_joiner, :candidate_dealer, :candidate_picked, 
+  :init_game, :player_ready, :start_game
+].each { |listener| require_relative "./listeners/#{listener}" }
 
 module SuperTues
   module Server
@@ -19,7 +20,7 @@ module SuperTues
         add Listeners::CandidateDealer.new('deal-candidates', env: env)
         add Listeners::CandidatePicked.new('candidate.picked', env: env)
         add Listeners::InitGame.new('game.init', env: env)
-        add Listeners::PlayerReady.new('player.ready')
+        add Listeners::PlayerReady.new('player.ready', env: env)
         add Listeners::StartGame.new('game.start', env: env)
       end
 
